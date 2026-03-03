@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>00002</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="header">
+<div class="logoText">00002</div>
+</div>
+
+<div class="container">
+
+<div class="panel categories">
+<h3>カテゴリ</h3>
+<div id="categoryList"></div>
+</div>
+
+<div class="panel products">
+<input id="searchBox" placeholder="検索" oninput="searchAll()">
+<div id="productList"></div>
+</div>
+
+<div class="panel detail">
+<h3>商品説明</h3>
+<div id="productDetail"></div>
+</div>
+
+</div>
+
+<div id="modal" class="modal"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBuntfW8chPksWc8xCMVw9LFdqhmbe8Dps",
+  authDomain: "project-1903050700199799038.firebaseapp.com",
+  projectId: "project-1903050700199799038",
+  storageBucket: "project-1903050700199799038.firebasestorage.app",
+  messagingSenderId: "338189734914",
+  appId: "1:338189734914:web:01997c9526952de07e031b"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let categories=[];
+let products=[];
+let currentCategory=null;
+
+const categoryList=document.getElementById("categoryList");
+const productList=document.getElementById("productList");
+const detail=document.getElementById("productDetail");
+const modal=document.getElementById("modal");
+
+/* ===== メディア判定（万能版） ===== */
+
+function detectMedia(url){
+
+if(!url) return {type:"none"};
+url=url.trim();
+
+/* ===== YouTube ===== */
+if(url.includes("youtu")){
+let id="";
+if(url.includes("youtu.be/")){
+id=url.split("youtu.be/")[1].split("?")[0];
+}
+else if(url.includes("watch?v=")){
+id=url.split("watch?v=")[1].split("&")[0];
+}
+else if(url.includes("embed/")){
+id=url.split("embed/")[1].split("?")[0];
+}
+return {type:"youtube",src:"https://www.youtube.com/embed/"+id};
+}
+
+/* ===== Vimeo ===== */
+if(url.includes("vimeo.com")){
+let id=url.split("/").pop().split("?")[0];
+return {type:"vimeo",src:"https://player.vimeo.com/video/"+id};
+}
+
+/* ===== 直リンク動画 ===== */
+if(url.match(/\.(mp4|webm|ogg)$/i)){
+return {type:"video",src:url};
+}
+
+/* ===== 画像 ===== */
+if(url.match(/\.(jpg|jpeg|png|gif|webp)$/i)){
+return {type:"image",src:url};
+}
+
+/* ===== その他 ===== */
+return {type:"iframe",src:url};
+}
+
+/* ===== カテゴリ表示 ===== */
+
+function renderCategories(){
+categoryList.innerHTML="";
+categories.forEach(c=>{
+const div=document.createElement("div");
+div.className="categoryBtn";
+div.onclick=()=>{
+currentCategory=c.name;
+renderProducts();
+detail.innerHTML="";
+};
+div.innerHTML=`
+<div style="display:flex;align-items:center;gap:10px">
+<img src="${c.image||""}" onerror="this.style.display='none'">
+<span>${c.name}</span>
+</div>`;
+categoryList.appendChild(div);
+});
+}
+
+/* ===== 商品一覧 ===== */
+
+function renderProducts(){
+productList.innerHTML="";
+products
+.filter(p=>p.category===currentCategory)
+.forEach(p=>{
+const div=document.createElement("div");
+div.className="card";
+div.onclick=()=>showDetail(p);
+div.innerHTML=`
+<img src="${p.image||""}" onerror="this.style.display='none'">
+<div class="title">${p.name}</div>`;
+productList.appendChild(div);
+});
+}
+
+/* ===== 検索 ===== */
+
+window.searchAll=function(){
+const q=document.getElementById("searchBox").value.toLowerCase();
+productList.innerHTML="";
+products
+.filter(p=>p.category===currentCategory &&
+(p.name||"").toLowerCase().includes(q))
+.forEach(p=>{
+const div=document.createElement("div");
+div.className="card";
+div.onclick=()=>showDetail(p);
+div.innerHTML=`
+<img src="${p.image||""}" onerror="this.style.display='none'">
+<div class="title">${p.name}</div>`;
+productList.appendChild(div);
+});
+}
+
+/* ===== 詳細表示 ===== */
+
+function showDetail(p){
+
+let description=(p.desc||"").replace(/\n/g,"<br>");
+let html=`<h2>${p.name}</h2><div class="desc">${description}</div>`;
+
+/* 画像 */
+if(p.image){
+let media=detectMedia(p.image);
+if(media.type==="image"){
+html+=`<img src="${media.src}">`;
+}
+}
+
+/* 動画 */
+if(p.video){
+let media=detectMedia(p.video);
+
+if(media.type==="youtube"||media.type==="vimeo"){
+html+=`<iframe src="${media.src}" frameborder="0" allowfullscreen></iframe>`;
+}
+else if(media.type==="video"){
+html+=`<video src="${media.src}" controls style="width:100%"></video>`;
+}
+else if(media.type==="iframe"){
+html+=`<iframe src="${media.src}" frameborder="0"></iframe>`;
+}
+}
+
+if(window.innerWidth>700){
+detail.innerHTML=html;
+}else{
+modal.innerHTML=`<button class="closeBtn" onclick="closeModal()">閉じる</button>${html}`;
+modal.style.display="block";
+}
+}
+
+window.closeModal=function(){
+modal.style.display="none";
+}
+
+/* ===== Firebase ===== */
+
+onSnapshot(collection(db,"categories"),s=>{
+categories=s.docs.map(d=>d.data());
+renderCategories();
+});
+
+onSnapshot(collection(db,"products"),s=>{
+products=s.docs.map(d=>d.data());
+});
+
+</script>
+
+</body>
+</html>
