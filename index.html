@@ -208,12 +208,14 @@ modal.style.display="none";
 /* ===== Firebase ===== */
 
 onSnapshot(collection(db,"categories"),s=>{
-categories=s.docs.map(d=>d.data());
+categories=s.docs.map(d=>d.data())
+.sort((a,b)=>(a.order||0)-(b.order||0));
 renderCategories();
 });
 
 onSnapshot(collection(db,"products"),s=>{
-products=s.docs.map(d=>d.data());
+products=s.docs.map(d=>d.data())
+.sort((a,b)=>(a.order||0)-(b.order||0));
 });
 
 </script>
