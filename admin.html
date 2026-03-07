@@ -6,7 +6,7 @@
 if(sessionStorage.getItem("admin_login") !== "ok"){
 const pass = prompt("管理者パスワード");
 
-if(pass === "mdmd9696"){
+if(pass === "huhu3434"){
 sessionStorage.setItem("admin_login","ok");
 }else{
 alert("パスワードが違います");
@@ -17,7 +17,7 @@ location.href="index.html";
 
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>管理画面5</title>
+<title>管理画面4</title>
 
 <style>
 body{margin:0;font-family:system-ui;background:#0b0f16;color:#fff;padding:20px;}
@@ -69,13 +69,13 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/fireba
 import { getFirestore, collection, addDoc, deleteDoc, doc, updateDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const firebaseConfig = {
-apiKey:"AIzaSyB_t1K3UESeepfRZdUM1NNA3MIvvO-eBpQ",
-authDomain:"project-9012524020148214366.firebaseapp.com",
-projectId:"project-9012524020148214366",
-storageBucket:"project-9012524020148214366.firebasestorage.app",
-messagingSenderId:"276996196539",
-appId:"1:276996196539:web:5731df7a1b37589f0dc19e",
-measurementId:"G-0VDGYK14LC"
+  apiKey: "AIzaSyB_t1K3UESeepfRZdUM1NNA3MIvvO-eBpQ",
+  authDomain: "project-9012524020148214366.firebaseapp.com",
+  projectId: "project-9012524020148214366",
+  storageBucket: "project-9012524020148214366.firebasestorage.app",
+  messagingSenderId: "276996196539",
+  appId: "1:276996196539:web:5731df7a1b37589f0dc19e",
+  measurementId: "G-0VDGYK14LC"
 };
 
 const app=initializeApp(firebaseConfig);
